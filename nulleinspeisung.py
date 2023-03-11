@@ -33,7 +33,7 @@ while True:
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         payload = f'''data={{"serial":"{Serial}", "limit_type":1, "limit_value":{Limit}}}'''
         newLimit = requests.post(url=f'http://{dtuIP}/api/limit/config', data=payload, auth=HTTPBasicAuth(dtuNutzer, dtuPasswort), headers=headers)
-        print('Konfiguration Stauts:', newLimit.json()['type'])
+        print('Konfiguration Status:', newLimit.json()['type'])
 
     # Werte setzen
     print("aktueller Bezug - Haus:   ",grid_sum)
