@@ -31,7 +31,7 @@ while True:
     # Setzt ein limit auf das Wechselrichter
     def setLimit(Serial, Limit):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        payload = f'''data={{"serial":"{Serial}", "limit_type":0, "limit_value":{Limit}}}'''
+        payload = f'''data={{"serial":"{Serial}", "limit_type":0, "limit_value":{Limit}}}'''  #    AbsolutNonPersistent = 0x0000, // 0 | RelativNonPersistent = 0x0001, // 1 | AbsolutPersistent = 0x0100, // 256 |  RelativPersistent = 0x0101 // 257
         newLimit = requests.post(url=f'http://{dtuIP}/api/limit/config', data=payload, auth=HTTPBasicAuth(dtuNutzer, dtuPasswort), headers=headers)
         print('Konfiguration Status:', newLimit.json()['type'])
 
