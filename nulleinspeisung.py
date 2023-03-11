@@ -31,7 +31,7 @@ while True:
     # Setzt ein limit auf das Wechselrichter
     def setLimit(Serial, Limit):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        payload = f'''data={{"serial":"{Serial}", "limit_type":1, "limit_value":{Limit}}}'''
+        payload = f'''data={{"serial":"{Serial}", "limit_type":0, "limit_value":{Limit}}}'''
         newLimit = requests.post(url=f'http://{dtuIP}/api/limit/config', data=payload, auth=HTTPBasicAuth(dtuNutzer, dtuPasswort), headers=headers)
         print('Konfiguration Status:', newLimit.json()['type'])
 
@@ -39,24 +39,28 @@ while True:
     print("aktueller Bezug - Haus:   ",grid_sum)
     if reachable:
         # Setzen Sie den Grenzwert auf den höchsten Wert, wenn er über dem zulässigen Höchstwert liegt.
-        if (altes_limit >= maximum_wr or grid_sum >= maximum_wr or setpoint >= maximum_wr):
-            print("setze Limiter auf maximum")
-            setpoint = maximum_wr
-
         # wir weniger bezogen als maximum_wr dann neues Limit ausrechnen
-        if (grid_sum+altes_limit) <= maximum_wr:
-            setpoint = grid_sum + altes_limit - 5
-            print("setpoint:",grid_sum,"+",altes_limit,"-5 ")
-            print("neues Limit berechnet auf ",setpoint)
-        if setpoint <= 100:
-            setpoint = 100
-            print("setpoint: 100 minimum gesetzt")
+        if (grid_sum) <= 0:  # Aktueller Bezug aus dem Netz. Falls negativ wird ins Netz eingespeist 
+            setpoint = grid_sum + power - 5  #Limit -5Watt
+            print("setpoint Bezug:",grid_sum,"+ Erzeugung: ",power,"-5 ")
+            print("neues Limit berechnet auf ",setpoint,"W")
+
+        if  grid_sum >= 5: # Bezug größer 5 Watt
+            setpoint = maximum_wr
+            print("setpoint:", setpoint,"W  gesetzt")
             print("neues Limit festgelegt auf ",setpoint)
 
-        print("setze Einspeiselimit auf: ",setpoint)
-        # neues limit setzen
-        setLimit(serial, setpoint)
-        print("Solarzellenstrom:",power,"  Setpoint:",setpoint)
+        print("setze Einspeiselimit auf: ",setpoint, "W")
+
+        # Limit bleibt gleich 
+        if setpoint == altes_limit:
+            print("setpoint nicht setzen, da Limit wie zuvor")
+
+        # Limit geändert    
+        if setpoint != altes_limit:
+            print("setpoint setzen, da geändert")
+            setLimit(serial, setpoint)
+            print("Solarzellenstrom:",power,"  Setpoint:",setpoint,"W")
 
         time.sleep(5) # wait
 
