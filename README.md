@@ -1,6 +1,5 @@
 # Nulleinspeisung Hoymiles HM-350 mit OpenDTU & Emlog via Python Steuerung
 
-# Achtung, neue Version kommt morgen 12.03.23 da noch Bugs vorhanden sind!
 
 Dies ist ein Python-Skript, das den aktuellen Hausverbrauch mit Emlog ausliest, die Nulleinspeisung berechnet und die Ausgangsleistung eines Hoymiles-Wechselrichters mit Hilfe der OpenDTU entsprechend anpasst. Somit wird kein unnötiger Strom ins Betreibernetz abgegeben.
 
@@ -12,3 +11,7 @@ Dies ist ein Python-Skript, das den aktuellen Hausverbrauch mit Emlog ausliest, 
 Shelly3EM-Infos finden Sie hier: https://selbstbau-pv.de/wissensbasis/nulleinspeisung-hoymiles-hm-1500-mit-opendtu-python-steuerung/
 
 Zu Emlog kommen demnächst Infos.
+
+Version vom 11.03.23
+  - div. Fixes, da Emlog den wirklichen Bezug darstellt. Solarproduktion ist dort schon eingerechnet.
+  - limit_type=0 da, bei limit_type=1 der "relative" Wert gesetzt werden muss.
