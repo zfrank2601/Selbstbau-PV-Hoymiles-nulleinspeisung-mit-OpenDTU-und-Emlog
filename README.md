@@ -15,3 +15,6 @@ Zu Emlog kommen demnächst Infos.
 Version vom 11.03.23
   - div. Fixes, da Emlog den wirklichen Bezug darstellt. Solarproduktion ist dort schon eingerechnet.
   - limit_type=0 da, bei limit_type=1 der "relative" Wert gesetzt werden muss.
+
+Version  vom 13.03.23
+  - Änderungen an aktueller OpenDTU-Api mit übernommen
