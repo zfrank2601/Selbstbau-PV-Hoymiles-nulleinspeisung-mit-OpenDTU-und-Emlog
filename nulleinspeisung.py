@@ -20,7 +20,7 @@ while True:
     reachable   = r['inverters'][0]['reachable'] # ist DTU erreichbar ?
     producing   = int(r['inverters'][0]['producing']) # produziert der Wechselrichter etwas ?
     altes_limit = int(r['inverters'][0]['limit_absolute']) # wo war das alte Limit gesetzt
-    power_dc    = r['inverters'][0]['DC']['0']['Power DC']['v']  # Lieferung DC vom Panel
+    power_dc    = r['inverters'][0]['AC']['0']['Power DC']['v']  # Lieferung DC vom Panel
     power       = r['inverters'][0]['AC']['0']['Power']['v'] # Abgabe BKW AC in Watt
 
     # Nimmt Daten von der Shelly 3EM Rest-API und übersetzt sie in ein json-Format
