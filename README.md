@@ -18,3 +18,6 @@ Version vom 11.03.23
 
 Version  vom 13.03.23
   - Änderungen an aktueller OpenDTU-Api mit übernommen
+
+Version vom 17.03.23
+  - Script optimiert, Änderungen des WR-Limits optimiert (habe nur nen HM350)
