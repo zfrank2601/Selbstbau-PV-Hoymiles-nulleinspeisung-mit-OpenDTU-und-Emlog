@@ -44,7 +44,7 @@ while True:
     setpoint= verbrauch - zielwert
     print("aktueller Bezug - Wohnung kpl: ", verbrauch)
     print("aktueller Bezug - Stromzähler: ", grid_sum)
-    print("aktueller Erzeugung - Solar  : ", power)
+    print("aktuelle  Erzeugung - Solar  : ", power)
     print("neues Limit berechnet auf    : ", setpoint)
     if reachable:
         # Setzen Sie den Grenzwert auf den höchsten Wert, wenn er über dem zulässigen Höchstwert liegt.
