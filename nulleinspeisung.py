@@ -1,16 +1,20 @@
 import requests, time
 from requests.auth import HTTPBasicAuth
 
-# Diese Daten müssen angepasst werden: zeile 5 - 12
-serial = "112100000000" # Seriennummern der Hoymiles Wechselrichter
+# Diese Daten müssen angepasst werden: zeile 5 - 17
+serial = "1120000000" # Seriennummern der Hoymiles Wechselrichter
 maximum_wr = 350 # Maximum ausgabe des wechselrichters
 
-dtuIP = '10.26.x.x' # IP Adresse von OpenDTU
+dtuIP = '10.x.x.x' # IP Adresse von OpenDTU
 dtuNutzer = 'admin' # OpenDTU Nutzername
-dtuPasswort = 'openDTU42' # OpenDTU Passwort
+dtuPasswort = 'password' # OpenDTU Passwort
 
-emlogIP = '10.26.x.x' #IP Adresse von Emlog
-
+emlogIP = '10.x.x.x' #IP Adresse von EMLOG
+zielwert = 5 # geplanter Bezug aus Netz
+obere_abw = 10 # erlaubte Abweichung über den Zielwert
+untere_abw = 10 # erlaubte Abweichung unter den Zielwert
+sleep_time = 9 # Sleep_Time des Scripts
+verbrauch_min = 50 #wenn Verbrauch größer dann auf maximum_wr
 
 while True:
     # Nimmt Daten von der openDTU Rest-API und übersetzt sie in ein json-Format
@@ -20,9 +24,9 @@ while True:
     reachable   = r['inverters'][0]['reachable'] # ist DTU erreichbar ?
     producing   = int(r['inverters'][0]['producing']) # produziert der Wechselrichter etwas ?
     altes_limit = int(r['inverters'][0]['limit_absolute']) # wo war das alte Limit gesetzt
-    power_dc    = r['inverters'][0]['AC']['0']['Power DC']['v']  # Lieferung DC vom Panel
+#    power_dc    = r['inverters'][0]['0']['Power DC']['v']  # Lieferung DC vom Panel
     power       = r['inverters'][0]['AC']['0']['Power']['v'] # Abgabe BKW AC in Watt
-
+#print("altes_limit",altes_limit,"+power",power)
     # Nimmt Daten von der Shelly 3EM Rest-API und übersetzt sie in ein json-Format
     e = requests.get(url = f'http://{emlogIP}/pages/getinformation.php?export&meterindex=1' ).json()
     grid_sum    = e['Wirkleistung_Bezug']['Leistung170'] # Gesamtleistung170
@@ -31,39 +35,36 @@ while True:
     # Setzt ein limit auf das Wechselrichter
     def setLimit(Serial, Limit):
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        payload = f'''data={{"serial":"{Serial}", "limit_type":0, "limit_value":{Limit}}}'''  #    AbsolutNonPersistent = 0x0000, // 0 | RelativNonPersistent = 0x0001, // 1 | AbsolutPersistent = 0x0100, // 256 |  RelativPersistent = 0x0101 // 257
+        payload = f'''data={{"serial":"{Serial}", "limit_type":0, "limit_value":{Limit}}}'''
         newLimit = requests.post(url=f'http://{dtuIP}/api/limit/config', data=payload, auth=HTTPBasicAuth(dtuNutzer, dtuPasswort), headers=headers)
         print('Konfiguration Status:', newLimit.json()['type'])
 
     # Werte setzen
-    print("aktueller Bezug - Haus:   ",grid_sum)
+    verbrauch = grid_sum + power
+    setpoint= verbrauch - zielwert
+    print("aktueller Bezug - Wohnung kpl: ", verbrauch)
+    print("aktueller Bezug - Stromzähler: ", grid_sum)
+    print("aktueller Erzeugung - Solar  : ", power)
+    print("neues Limit berechnet auf    : ", setpoint)
     if reachable:
         # Setzen Sie den Grenzwert auf den höchsten Wert, wenn er über dem zulässigen Höchstwert liegt.
-        # wir weniger bezogen als maximum_wr dann neues Limit ausrechnen
-        if (grid_sum) <= 0:  # Aktueller Bezug aus dem Netz. Falls negativ wird ins Netz eingespeist 
-            setpoint = grid_sum + power - 5  #Limit -5Watt
-            print("setpoint Bezug:",grid_sum,"+ Erzeugung: ",power,"-5 ")
-            print("neues Limit berechnet auf ",setpoint,"W")
-
-        if  grid_sum >= 5: # Bezug größer 5 Watt
+        if ( setpoint >= maximum_wr or verbrauch > verbrauch_min ):
+            print("setze Maximum                : ", maximum_wr)
             setpoint = maximum_wr
-            print("setpoint:", setpoint,"W  gesetzt")
-            print("neues Limit festgelegt auf ",setpoint)
 
-        print("setze Einspeiselimit auf: ",setpoint, "W")
+        # falls setpoint zu weit vom aktuellen Limit abweicht
+        if ( setpoint < altes_limit - untere_abw or setpoint > altes_limit + obere_abw ):
+            print("setze Wechselrichterlimit auf: ", setpoint)
+            # neues limit setzen
 
-        # Limit bleibt gleich 
-        if setpoint == altes_limit:
-            print("setpoint nicht setzen, da Limit wie zuvor")
-
-        # Limit geändert    
-        if setpoint != altes_limit:
-            print("setpoint setzen, da geändert")
+        if  ( setpoint >  altes_limit or setpoint < altes_limit):
+            print("aktiviere Setpoint           : ",setpoint)
             setLimit(serial, setpoint)
-            print("Solarzellenstrom:",power,"  Setpoint:",setpoint,"W")
+        else:
+            print("Setpoint unverändert         : ",setpoint)
+    print("------------------------------------------")
+    time.sleep(sleep_time) # wait
 
-        time.sleep(5) # wait
 
-    # Wenn der Wechselrichter nicht erreicht werden kann, wird der limit auf maximum gestellt
     if setpoint == 0: setpoint = grid_sum
     if not reachable: setpoint = maximum_wr
