@@ -55,7 +55,7 @@ while True:
         # falls setpoint zu weit vom aktuellen Limit abweicht
         if ( setpoint < altes_limit - untere_abw or setpoint > altes_limit + obere_abw ):
             print("setze Wechselrichterlimit auf: ", setpoint)
-            # neues limit setzen
+            setLimit(serial, setpoint)
 
         if  ( setpoint >  altes_limit or setpoint < altes_limit):
             print("aktiviere Setpoint           : ",setpoint)
