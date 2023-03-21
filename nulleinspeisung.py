@@ -54,14 +54,14 @@ while True:
     print("neues Limit berechnet auf    : ", setpoint)
     if reachable:
         # Setzen Sie den Grenzwert auf den höchsten Wert, wenn er über dem zulässigen Höchstwert liegt.
-        if ( setpoint >= maximum_wr or verbrauch > verbrauch_min ):
+        if ( setpoint >= maximum_wr or grid_sum > verbrauch_min ):
             print("setze Maximum                : ", maximum_wr)
             setpoint = maximum_wr
 
         # falls setpoint zu weit vom aktuellen Limit abweicht
         if ( setpoint < altes_limit - untere_abw or setpoint > altes_limit + obere_abw ):
             print("setze Wechselrichterlimit auf: ", setpoint)
-            setLimit(serial, setpoint)
+
 
         if  ( setpoint >  altes_limit or setpoint < altes_limit):
             print("aktiviere Setpoint           : ",setpoint)
