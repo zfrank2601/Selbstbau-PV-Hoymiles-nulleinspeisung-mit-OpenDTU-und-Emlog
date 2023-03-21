@@ -24,13 +24,19 @@ while True:
     reachable   = r['inverters'][0]['reachable'] # ist DTU erreichbar ?
     producing   = int(r['inverters'][0]['producing']) # produziert der Wechselrichter etwas ?
     altes_limit = int(r['inverters'][0]['limit_absolute']) # wo war das alte Limit gesetzt
-#    power_dc    = r['inverters'][0]['0']['Power DC']['v']  # Lieferung DC vom Panel
+    voltage_ac      = r['inverters'][0]['AC']['0']['Voltage']['v']  # Spannung DC vom Panel
+    voltage_dc      = r['inverters'][0]['DC']['0']['Voltage']['v']  # Spannung DC vom Panel
+    power_dc        = r['inverters'][0]['AC']['0']['Power DC']['v'] # Lieferung DC vom Panel
     power       = r['inverters'][0]['AC']['0']['Power']['v'] # Abgabe BKW AC in Watt
-#print("altes_limit",altes_limit,"+power",power)
-    # Nimmt Daten von der Shelly 3EM Rest-API und übersetzt sie in ein json-Format
+    frequency       = r['inverters'][0]['AC']['0']['Frequency']['v'] #
+    efficiency       = r['inverters'][0]['AC']['0']['Efficiency']['v'] #
+    temperature       = r['inverters'][0]['INV']['0']['Temperature']['v'] # Abgabe BKW AC in Watt    
     e = requests.get(url = f'http://{emlogIP}/pages/getinformation.php?export&meterindex=1' ).json()
     grid_sum    = e['Wirkleistung_Bezug']['Leistung170'] # Gesamtleistung170
+    bezugkwh    = e['Kwh_Bezug']['Kwh182'] #Bezug182
     setpoint    = 0     # Neues Limit in Watt
+    tagesleistung   = r['total']['YieldDay']['v']                   # Tagesleistung aller Strings
+    gesamtleistung  = r['total']['YieldTotal']['v']                 # Gesamtleistung aller Strings
 
     # Setzt ein limit auf das Wechselrichter
     def setLimit(Serial, Limit):
