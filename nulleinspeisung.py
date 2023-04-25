@@ -1,6 +1,6 @@
 import requests, time
 from requests.auth import HTTPBasicAuth
-
+#250423
 # Diese Daten müssen angepasst werden: zeile 5 - 17
 serial = "1120000000" # Seriennummern der Hoymiles Wechselrichter
 maximum_wr = 350 # Maximum ausgabe des wechselrichters
